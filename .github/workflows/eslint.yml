@@ -1,0 +1,44 @@
+name: ESLint Code Quality
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Get the list of changed JS files
+      - name: List changed JS files
+        id: changed_files
+        run: |
+          git fetch origin $GITHUB_BASE_REF $GITHUB_HEAD_REF
+          git diff --name-only --diff-filter=d origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF -- '*.js' > changed_files.txt
+          if [ ! -s changed_files.txt ]; then
+            echo "No JS files changed."
+            exit 0
+          fi
+
+      # Run ESLint on changed files
+      - name: Run ESLint
+        run: |
+          xargs -a changed_files.txt npx eslint
