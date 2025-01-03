@@ -10,31 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
 
-      # Set up PHP
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3" # Adjust PHP version as needed
+          php-version: "8.3"
 
-      # Install dependencies
-      - name: Install Composer dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist  --ignore-platform-reqs
+      - name: Install dependencies
+        run: composer install --no-progress --no-suggest --ignore-platform-reqs
 
-      # Get the list of changed PHP files
       - name: List changed PHP files
         id: changed_files
         run: |
-          git diff --name-only --diff-filter=d origin/$GITHUB_HEAD_REF..origin/$GITHUB_BASE_REF -- '*.php' > changed_files.txt
+          git fetch origin $GITHUB_BASE_REF $GITHUB_HEAD_REF
+          git diff --name-only --diff-filter=d origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF -- '*.php' > changed_files.txt
+          if [ ! -s changed_files.txt ]; then
+            echo "No PHP files changed."
+            exit 0
+          fi
 
-      # Run PHPCS on changed files
       - name: Run PHPCS
         run: |
-          if [ -s changed_files.txt ]; then
-            xargs -a changed_files.txt vendor/bin/phpcs --standard=PSR12
-          else
-            echo "No PHP files changed."
-          fi
+          xargs -a changed_files.txt vendor/bin/phpcs --standard=PSR12
