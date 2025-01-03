@@ -36,4 +36,4 @@ jobs:
 
       - name: Run PHPCS
         run: |
-          xargs -a changed_files.txt vendor/bin/phpcs --standard=PSR12
+          xargs -a changed_files.txt vendor/bin/phpcs --standard=PSR2
