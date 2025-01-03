@@ -36,6 +36,13 @@ jobs:
             exit 0
           fi
 
+      - name: Check if file with changes is not empty
+        run: |
+          if [ wc -c ./changed_files.txt | awk '{print $1}' -eq 0 ]; then
+            echo "No PHP files changed."
+            exit 0
+          fi
+
       - name: Run PHPCS
         run: |
           xargs -a changed_files.txt vendor/bin/phpcs --standard=PSR2
