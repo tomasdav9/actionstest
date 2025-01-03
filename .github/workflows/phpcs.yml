@@ -27,8 +27,8 @@ jobs:
       - name: List changed PHP files
         id: changed_files
         run: |
-          git fetch origin $GITHUB_BASE_REF $GITHUB_HEAD_REF
-          git diff --name-only --diff-filter=d origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF -- '*.php' > changed_files.txt
+          git fetch origin $GITHUB_BASE_REF origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF
+          git diff --name-only --diff-filter=d origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF -- '*.php' | xargs -I {} realpath --relative-to=. {} > changed_files.txt
           if [ ! -s changed_files.txt ]; then
             echo "No PHP files changed."
             exit 0
