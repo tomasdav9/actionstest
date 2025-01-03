@@ -38,7 +38,7 @@ jobs:
 
       - name: Check if file with changes is not empty
         run: |
-          if [ wc -c ./changed_files.txt | awk '{print $1}' -eq 0 ]; then
+          if [ wc -c < changed_files.txt | awk '{print $1}' -eq 0 ]; then
             echo "No PHP files changed."
             exit 0
           fi
