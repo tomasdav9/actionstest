@@ -1,0 +1,40 @@
+name: PHPCS Code Quality
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up PHP
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1" # Adjust PHP version as needed
+
+      # Install dependencies
+      - name: Install Composer dependencies
+        run: composer install --no-progress --no-suggest --prefer-dist
+
+      # Get the list of changed PHP files
+      - name: List changed PHP files
+        id: changed_files
+        run: |
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep '\.php$' > changed_files.txt
+
+      # Run PHPCS on changed files
+      - name: Run PHPCS
+        run: |
+          if [ -s changed_files.txt ]; then
+            xargs -a changed_files.txt vendor/bin/phpcs --standard=PSR12
+          else
+            echo "No PHP files changed."
+          fi
